@@ -1,38 +1,46 @@
 <template>
     <div class="layout">
-        <Layout>
-            <Sider breakpoint="md" collapsible :collapsed-width="78" v-model="isCollapsed">
-                <Menu active-name="1-2" theme="dark" width="auto" :class="menuitemClasses">
-                    <MenuItem name="1-1">
-                        <Icon type="ios-navigate"></Icon>
-                        <span>Option 1</span>
-                    </MenuItem>
-                    <MenuItem name="1-2">
-                        <Icon type="ios-search"></Icon>
-                        <span>Option 2</span>
-                    </MenuItem>
-                    <MenuItem name="1-3">
-                        <Icon type="ios-settings"></Icon>
-                        <span>Option 3</span>
-                    </MenuItem>
+        <TopBar></TopBar>
+        <div class="container">
+            <div class="menu">
+                <Menu :active-name="activeName" theme="dark" :class="menuitemClasses" @on-select="get_menu_name">
+                    <MenuGroup :title="group.name" v-for="(group,index) in routes" :key="index">
+                        <MenuItem v-for="(item,i) in group.children" :key="i" :name="item.name">
+                            <Icon type="md-document" />
+                            {{item.name}}
+                        </MenuItem>
+                    </MenuGroup>
                 </Menu>
-                <div slot="trigger"></div>
-            </Sider>
-            <Layout>
-                <Header class="layout-header-bar"></Header>
-                <Content :style="{margin: '20px', background: '#fff', minHeight: '220px'}">
-                    Content
+            </div>
+            <div class="content">
+                <Content style="margin-bottom:50px;height:fit-content">
+                    <router-view  :pageSizeOpts="pageSizeOpts"></router-view>
                 </Content>
-            </Layout>
-        </Layout>
+            </div>
+        </div>
+        
     </div>
 </template>
 <script>
+    import {routes} from '../router'
+    import TopBar from './widgets/TopBar'
     export default {
+        components:{
+            TopBar
+        },
         data () {
             return {
-                isCollapsed: false
+                isCollapsed: false,
+                theme: 'dark',
+                routes:routes,
+                pageSizeOpts:[10,20,30,40,50],
+                activeName:'',
             };
+        },
+        methods:{
+            get_menu_name(name) {
+                this.activeName = name;
+            }
         },
         computed: {
             menuitemClasses: function () {
@@ -41,44 +49,48 @@
                     this.isCollapsed ? 'collapsed-menu' : ''
                 ]
             }
+        },
+        mounted(){
+            console.log(this.routes)
         }
     }
 </script>
-<style scoped>
+<style lang="scss" scoped>
+    body{
+        position: absolute;
+        height: 100%;
+        width: 100%;
+    }
     .layout{
-        border: 1px solid #d7dde4;
         background: #f5f7f9;
-        position: relative;
+        position: absolute;
         border-radius: 4px;
         overflow: hidden;
+        height: 100%;
+        width: 100%;
+        .tarBar{
+            width: 100%;
+            height: 50px;
+        }
+        .container{
+            height: calc(100% - 50px);
+            display: flex;
+            .menu{
+                width: 240px;
+                height: 100%;
+                ul{
+                    height: 100%;
+                }
+            }
+            .content{
+                width: calc(100% - 240px);
+                padding-left: 30px;
+            }
+        }
     }
-    .layout-header-bar{
-        background: #fff;
-        box-shadow: 0 1px 1px rgba(0,0,0,.1);
+    .ivu-menu-item.ivu-menu-item-active.ivu-menu-item-selected{
+        color: white !important;
+        background: #2B85FB !important;
     }
-    .menu-item span{
-        display: inline-block;
-        overflow: hidden;
-        width: 69px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        vertical-align: bottom;
-        transition: width .2s ease .2s;
-    }
-    .menu-item i{
-        transform: translateX(0px);
-        transition: font-size .2s ease, transform .2s ease;
-        vertical-align: middle;
-        font-size: 16px;
-    }
-    .collapsed-menu span{
-        width: 0px;
-        transition: width .2s ease;
-    }
-    .collapsed-menu i{
-        transform: translateX(5px);
-        transition: font-size .2s ease .2s, transform .2s ease .2s;
-        vertical-align: middle;
-        font-size: 22px;
-    }
+
 </style>
